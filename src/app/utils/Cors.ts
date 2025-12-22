@@ -1,3 +1,4 @@
+// src/app/utils/Cors.ts
 import { NextResponse } from "next/server";
 
 export class Cors {
@@ -24,8 +25,10 @@ export class Cors {
   }
 }
 
-// Optional helper to wrap handlers with CORS
-export async function withCors(req: Request | any, handler: (req: any) => Promise<NextResponse>) {
+export async function withCors(
+  req: Request | any,
+  handler: (req: any) => Promise<NextResponse>
+) {
   const origin = req.headers.get?.("origin") ?? undefined;
 
   if (req.method === "OPTIONS") {

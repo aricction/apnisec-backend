@@ -1,3 +1,4 @@
+// src/app/handlers/BaseHandler.ts
 import { NextRequest, NextResponse } from "next/server";
 import { ValidationError } from "../errors/ValidationError";
 import { Cors } from "../utils/Cors";
