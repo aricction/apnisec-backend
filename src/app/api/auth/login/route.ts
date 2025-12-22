@@ -1,8 +1,9 @@
 import { AuthHandler } from "@/app/handlers/AuthHandler";
+import { NextRequest } from "next/server";
+
 export const runtime = "nodejs";
 
-const handler = new AuthHandler();
-
-export async function POST(request: Request) {
-  return handler.Login(request);
+export async function POST(request: NextRequest) {
+  const handler = new AuthHandler(request); 
+  return handler.login(); 
 }

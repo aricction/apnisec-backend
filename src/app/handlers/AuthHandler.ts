@@ -1,44 +1,56 @@
+import { NextRequest, NextResponse } from "next/server";
+import { BaseHandler } from "./BaseHandler";
 import { AuthValidator } from "../validators/AuthValidator";
 import { AuthService } from "../services/AuthService";
-import { NextRequest, NextResponse } from "next/server";
-export class AuthHandler {
-    private authService = new AuthService();
 
-    async Register(request: Request) {
-        try {
-            const body = await request.json();
-            AuthValidator.register(body);
+export class AuthHandler extends BaseHandler {
+  private authService: AuthService;
 
-            const result = await this.authService.register(
-                body.name,
-                body.email,
-                body.password
-            );
+  constructor(request: NextRequest) {
+    super(request);
+    this.authService = new AuthService();
+  }
 
-            return Response.json(result, { status: 201 });
-        } catch (error: any) {
-            // Re-throw to be handled by route handler
-            throw error;
-        }
-    }
+  async register(): Promise<NextResponse> {
+    return this.execute(async () => {
+      const body = await this.req.json();
 
-    async Login(request: Request) {
-        const body = await request.json();
+      AuthValidator.register(body);
 
-        AuthValidator.login(body);
-        const result = await this.authService.login(
-            body.email,
-            body.password
-        );
-        return Response.json(result);
-    }
+      const result = await this.authService.register(
+        body.name,
+        body.email,
+        body.password
+      );
 
-    async me(request: Request) : Promise<NextResponse>{
-        return this.authService.me(request);
-    }
+      return NextResponse.json(result, { status: 201 });
+    });
+  }
 
-    async Logout() :Promise<NextResponse> {
-        return this.authService.logout();
-    }
+  async login(): Promise<NextResponse> {
+    return this.execute(async () => {
+      const body = await this.req.json();
 
+      AuthValidator.login(body);
+
+      const result = await this.authService.login(
+        body.email,
+        body.password
+      );
+
+      return NextResponse.json(result);
+    });
+  }
+
+  async me(): Promise<NextResponse> {
+    return this.execute(() => {
+      return this.authService.me(this.req);
+    });
+  }
+
+  async logout(): Promise<NextResponse> {
+    return this.execute(() => {
+      return this.authService.logout();
+    });
+  }
 }
