@@ -1,11 +1,11 @@
-import { hash, compare } from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export class PasswordUtil {
   static async hash(password: string): Promise<string> {
-    return hash(password, 10);
+    return bcrypt.hash(password, 10);
   }
 
   static async compare(password: string, hash: string): Promise<boolean> {
-    return compare(password, hash);
+    return bcrypt.compare(password, hash);
   }
 }

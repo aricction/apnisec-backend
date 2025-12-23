@@ -5,15 +5,20 @@ import { JwtUtil } from "../utils/JwtUtil";
 import { ValidationError } from "../errors/ValidationError";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-
+import bcrypt from "bcrypt";
+import { Cors } from "../utils/Cors";
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export class AuthService {
   private userRepo = new UserRepository();
 
-
+  // ---------------------------
+  // REGISTER
+  // ---------------------------
   async register(name: string, email: string, password: string) {
-    const existingUser = await this.userRepo.findByEmail(email);
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const existingUser = await this.userRepo.findByEmail(normalizedEmail);
     if (existingUser) {
       throw new ValidationError("User already exists");
     }
@@ -21,7 +26,7 @@ export class AuthService {
     const hashedPassword = await PasswordUtil.hash(password);
     const newUser = await this.userRepo.create({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -36,9 +41,13 @@ export class AuthService {
     };
   }
 
-
+  // ---------------------------
+  // LOGIN
+  // ---------------------------
   async login(email: string, password: string) {
-    const user = await this.userRepo.findByEmail(email);
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await this.userRepo.findByEmail(normalizedEmail);
+     
     if (!user) {
       throw new ValidationError("Invalid credentials");
     }
@@ -58,6 +67,9 @@ export class AuthService {
     };
   }
 
+  // ---------------------------
+  // GET CURRENT USER
+  // ---------------------------
   async me(request: Request) {
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -73,9 +85,8 @@ export class AuthService {
       throw new ValidationError("Invalid token");
     }
 
-    const user = await this.userRepo.findByEmail(payload.email
-
-    );
+    // Use userId from JWT payload instead of email
+    const user = await this.userRepo.findById(payload.userId);
     if (!user) {
       throw new ValidationError("User not found");
     }
@@ -92,10 +103,20 @@ export class AuthService {
   // ---------------------------
   // LOGOUT
   // ---------------------------
-  async logout() {
-    return {
-      status: "success",
-      message: "Logged out successfully",
-    };
+ async logout(origin?: string): Promise<NextResponse> {
+    return NextResponse.json(
+      {
+        status: "success",
+        message: "Logged out successfully",
+      },
+      {
+        status: 200,
+        headers: {
+          ...Cors.headers(origin),
+          "Set-Cookie":
+            "token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0",
+        },
+      }
+    );
   }
 }

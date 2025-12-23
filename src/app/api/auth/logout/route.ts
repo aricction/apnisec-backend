@@ -8,7 +8,7 @@ export async function OPTIONS(req: NextRequest) {
   return Cors.preflight(req.headers.get("origin") ?? undefined);
 }
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const handler = new AuthHandler(req);
-  return handler.me();
+  return handler.logout();
 }

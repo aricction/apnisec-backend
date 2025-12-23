@@ -25,14 +25,24 @@ export class AuthHandler extends BaseHandler {
     });
   }
 
-  async login(): Promise<NextResponse> {
-    return this.execute(async () => {
-      const body = await this.req.json();
-      AuthValidator.login(body);
-      const result = await this.authService.login(body.email, body.password);
-      return this.json(result);
-    });
-  }
+async login(): Promise<NextResponse> {
+  return this.execute(async () => {
+    const body = await this.req.json();
+    
+    body.email = String(body.email);
+    body.password = String(body.password);
+
+    AuthValidator.login(body);
+
+    const result = await this.authService.login(
+      body.email,
+      body.password
+    );
+
+    return this.json(result);
+  });
+}
+
 
   async me(): Promise<NextResponse> {
   return this.execute(async () => {

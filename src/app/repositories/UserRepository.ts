@@ -3,12 +3,11 @@ import { prisma } from "../prisma/prismaClient";
 
 export class UserRepository {
   async create(data: { email: string; password: string; name?: string }) {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
 
     return prisma.user.create({
       data: {
         email: data.email,
-        password: hashedPassword,
+        password: data.password,
         name: data.name ?? "",
       },
     });
@@ -20,6 +19,12 @@ export class UserRepository {
     });
   }
 
+    async findById(id: string) {
+    return prisma.user.findUnique({
+      where: { id },
+    });
+  }
+  
   async update(userId: string, data: Partial<{ name: string; email: string; password: string }>) {
     return prisma.user.update({
       where: { id: userId },

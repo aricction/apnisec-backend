@@ -1,5 +1,5 @@
 // src/app/utils/Cors.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export class Cors {
   private static allowedOrigins = ["http://localhost:3000"];
@@ -23,22 +23,24 @@ export class Cors {
       headers: this.headers(origin),
     });
   }
+
+  static apply(res: NextResponse, origin?: string) {
+    const headers = this.headers(origin);
+    Object.entries(headers).forEach(([key, value]) => {
+      res.headers.set(key, value);
+    });
+  }
 }
 
+// ✅ SAFE withCors (DOES NOT TOUCH BODY)
 export async function withCors(
-  req: Request | any,
-  handler: (req: any) => Promise<NextResponse>
+  req: NextRequest,
+  handler: (req: NextRequest) => Promise<NextResponse>
 ) {
-  const origin = req.headers.get?.("origin") ?? undefined;
-
-  if (req.method === "OPTIONS") {
-    return Cors.preflight(origin);
-  }
-
   const response = await handler(req);
 
-  const headers = Cors.headers(origin);
-  Object.entries(headers).forEach(([key, value]) => response.headers.set(key, value));
+  const origin = req.headers.get("origin") ?? undefined;
+  Cors.apply(response, origin);
 
   return response;
 }
