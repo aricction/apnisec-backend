@@ -22,3 +22,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   return withCors(req, async (req) => handler.delete(req, params.id));
 }
+
+/* 👇 REQUIRED to satisfy TS module detection in Next build */
+export {};
