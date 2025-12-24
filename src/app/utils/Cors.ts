@@ -2,7 +2,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export class Cors {
-  private static allowedOrigins = ["http://localhost:3000"];
+  private static allowedOrigins = [
+    "http://apnisec-frontend.vercel.app" , 
+    "http://localhost:3000"];
 
   static headers(origin?: string) {
     const allowedOrigin = this.allowedOrigins.includes(origin ?? "")

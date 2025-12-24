@@ -1,4 +1,3 @@
-// src/app/api/auth/register/route.ts
 import { NextRequest } from "next/server";
 import { AuthHandler } from "@/app/handlers/AuthHandler";
 import { Cors } from "@/app/utils/Cors";
