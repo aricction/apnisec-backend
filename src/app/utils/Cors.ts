@@ -1,22 +1,24 @@
-// src/app/utils/Cors.ts
 import { NextRequest, NextResponse } from "next/server";
 
 export class Cors {
   private static allowedOrigins = [
-    "http://apnisec-frontend.vercel.app" , 
-    "http://localhost:3000"];
+    "https://apnisec-frontend.vercel.app",
+    "http://localhost:3000",
+  ];
 
   static headers(origin?: string) {
-    const allowedOrigin = this.allowedOrigins.includes(origin ?? "")
-      ? origin
-      : this.allowedOrigins[0];
-
-    return {
-      "Access-Control-Allow-Origin": allowedOrigin!,
+    const headers: Record<string, string> = {
       "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
       "Access-Control-Allow-Credentials": "true",
     };
+
+    // ✅ Only set origin if it is allowed
+    if (origin && this.allowedOrigins.includes(origin)) {
+      headers["Access-Control-Allow-Origin"] = origin;
+    }
+
+    return headers;
   }
 
   static preflight(origin?: string) {
@@ -34,14 +36,19 @@ export class Cors {
   }
 }
 
-// ✅ SAFE withCors (DOES NOT TOUCH BODY)
+// ✅ SAFE withCors
 export async function withCors(
   req: NextRequest,
   handler: (req: NextRequest) => Promise<NextResponse>
 ) {
-  const response = await handler(req);
-
   const origin = req.headers.get("origin") ?? undefined;
+
+  // ✅ Handle preflight FIRST
+  if (req.method === "OPTIONS") {
+    return Cors.preflight(origin);
+  }
+
+  const response = await handler(req);
   Cors.apply(response, origin);
 
   return response;
