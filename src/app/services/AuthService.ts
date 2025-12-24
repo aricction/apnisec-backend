@@ -6,7 +6,7 @@ import { ValidationError } from "../errors/ValidationError";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { Cors } from "../utils/Cors";
-import { sendWelcomeEmail } from "../utils/sendEmail";
+//import { sendWelcomeEmail } from "../utils/sendEmail";
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export class AuthService {
@@ -32,7 +32,7 @@ export class AuthService {
   });
 
   //  Send welcome email (non-blocking, safe)
- sendWelcomeEmail(newUser.email, newUser.name);
+ //sendWelcomeEmail(newUser.email, newUser.name);
 
   const token = JwtUtil.sign({ userId: newUser.id });
 
