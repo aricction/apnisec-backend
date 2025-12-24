@@ -29,8 +29,8 @@
   },
   "scripts": {
     "dev": "next dev -p 4000",
-  "build": "next build",
-  "start": "next start -p 4000",
+    "build": "next build",
+    "start": "next start -p 4000",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",

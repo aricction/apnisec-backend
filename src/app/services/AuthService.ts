@@ -5,8 +5,8 @@ import { JwtUtil } from "../utils/JwtUtil";
 import { ValidationError } from "../errors/ValidationError";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
 import { Cors } from "../utils/Cors";
+import { sendWelcomeEmail } from "../utils/sendEmail";
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export class AuthService {
@@ -15,31 +15,39 @@ export class AuthService {
   // ---------------------------
   // REGISTER
   // ---------------------------
-  async register(name: string, email: string, password: string) {
-    const normalizedEmail = email.trim().toLowerCase();
+ async register(name: string, email: string, password: string) {
+  const normalizedEmail = email.trim().toLowerCase();
 
-    const existingUser = await this.userRepo.findByEmail(normalizedEmail);
-    if (existingUser) {
-      throw new ValidationError("User already exists");
-    }
-
-    const hashedPassword = await PasswordUtil.hash(password);
-    const newUser = await this.userRepo.create({
-      name,
-      email: normalizedEmail,
-      password: hashedPassword,
-    });
-
-    const token = JwtUtil.sign({ userId: newUser.id });
-
-    const { password: _, ...safeUser } = newUser;
-
-    return {
-      status: "success",
-      data: { user: safeUser, token },
-      message: "User registered successfully",
-    };
+  const existingUser = await this.userRepo.findByEmail(normalizedEmail);
+  if (existingUser) {
+    throw new ValidationError("User already exists");
   }
+
+  const hashedPassword = await PasswordUtil.hash(password);
+
+  const newUser = await this.userRepo.create({
+    name,
+    email: normalizedEmail,
+    password: hashedPassword,
+  });
+
+  //  Send welcome email (non-blocking, safe)
+ sendWelcomeEmail(newUser.email, newUser.name);
+
+  const token = JwtUtil.sign({ userId: newUser.id });
+
+  const { password: _, ...safeUser } = newUser;
+
+  return {
+    status: "success",
+    data: {
+      user: safeUser,
+      token,
+    },
+    message: "User registered successfully",
+  };
+}
+
 
   // ---------------------------
   // LOGIN
@@ -56,6 +64,9 @@ export class AuthService {
     if (!valid) {
       throw new ValidationError("Invalid credentials");
     }
+
+ 
+
 
     const token = JwtUtil.sign({ userId: user.id });
     const { password: _, ...safeUser } = user;
@@ -119,4 +130,6 @@ export class AuthService {
       }
     );
   }
+
+ 
 }

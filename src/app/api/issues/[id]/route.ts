@@ -1,4 +1,4 @@
-// src/app/api/issues/[id]/route.ts
+
 import { NextRequest } from "next/server";
 import { IssueHandler } from "@/app/handlers/IssueHandler";
 import { Cors, withCors } from "@/app/utils/Cors";
