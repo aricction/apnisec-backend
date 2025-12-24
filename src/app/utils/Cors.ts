@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export class Cors {
   private static allowedOrigins = [
     "https://apnisec-frontend.vercel.app",
+    "https://apnisec-frontend-aricctions-projects.vercel.app",
     "http://localhost:3000",
   ];
 
